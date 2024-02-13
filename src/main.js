@@ -31,7 +31,6 @@ refs.galleryElem.innerHTML = '';
 try{
     const data = await newApi.getImages();
     newApi.totalResult = data.totalHits;
-    console.log(data);
     renderImages(data.hits);
 }catch(err){
     newApi.totalResult = 0;
