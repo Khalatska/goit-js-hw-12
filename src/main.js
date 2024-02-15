@@ -1,4 +1,4 @@
-import {NewsAPI} from './js/pixabay-api';
+import {PixabayAPI} from './js/pixabay-api';
 import {renderImages} from './js/render-functions'
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
@@ -13,7 +13,7 @@ const refs = {
     loaderElem: document.querySelector('.loader'),
 };
 
- const newApi = new NewsAPI();
+ const pixabayAPI = new PixabayAPI();
  
 //===============================================================
 
@@ -24,16 +24,24 @@ e.preventDefault();
 
 showLoader();
 const inputValue = e.target.elements.query.value.trim();
-if(!inputValue) return;
-newApi.query = inputValue;
-newApi.currentPage = 1;
+if(!inputValue) {
+    refs.loaderElem.classList.add('hidden');
+    iziToast.show({
+        message: `Please enter your search query.`,
+        position: 'topRight',
+        color: 'red',
+    })
+    return;
+};
+pixabayAPI.query = inputValue;
+pixabayAPI.currentPage = 1;
 refs.galleryElem.innerHTML = '';
 try{
-    const data = await newApi.getImages();
-    newApi.totalResult = data.totalHits;
+    const data = await pixabayAPI.getImages();
+    pixabayAPI.totalResult = data.totalHits;
     renderImages(data.hits);
 }catch(err){
-    newApi.totalResult = 0;
+    pixabayAPI.totalResult = 0;
     iziToast.error({
         title: 'Error',
         message: err.message,
@@ -51,9 +59,17 @@ refs.btnLoadMoreElem.addEventListener('click', onBtnLoadMore);
 
 async function onBtnLoadMore(){
  showLoader();
- newApi.currentPage += 1;
- const data = await newApi.getImages();
- renderImages(data.hits);
+ try{
+    pixabayAPI.currentPage += 1;
+    const data = await pixabayAPI.getImages();
+    renderImages(data.hits); 
+ }catch(err){
+    pixabayAPI.totalResult = 0;
+    iziToast.error({
+        title: 'Error',
+        message: err.message,
+      });
+}
  hideLoader();
  checkBtnStatus();
 
@@ -67,18 +83,18 @@ async function onBtnLoadMore(){
 //===============================================================
 
 function checkBtnStatus () {
-    const maxPage = Math.ceil(newApi.totalResult / NewsAPI.PAGE_SIZE);
-    const lastPage = maxPage <= newApi.currentPage;
+    const maxPage = Math.ceil(pixabayAPI.totalResult / PixabayAPI.PAGE_SIZE);
+    const lastPage = maxPage <= pixabayAPI.currentPage;
     if(lastPage){
         refs.btnLoadMoreElem.classList.add('hidden');
-        if(newApi.totalResult === 0){
+        if(pixabayAPI.totalResult === 0){
             iziToast.show({
-                message: `"We're sorry, there are no results."`,
+                message: `We're sorry, there are no results.`,
                 position: 'topRight',
                 color: 'red',
             })}else {
         iziToast.show({
-            message: `"We're sorry, but you've reached the end of search results."`,
+            message: `We're sorry, but you've reached the end of search results.`,
             position: 'topRight',
             color: 'blue',
         });

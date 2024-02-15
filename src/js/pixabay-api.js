@@ -1,7 +1,7 @@
 import axios from 'axios';
  
 
-export class NewsAPI {
+export class PixabayAPI {
     static PAGE_SIZE = 15;
     constructor(){
         this.query = null;
@@ -20,7 +20,7 @@ export class NewsAPI {
             orientation: 'horizontal',
             safeSearch: true, 
             page: this.currentPage, 
-            per_page: NewsAPI.PAGE_SIZE,
+            per_page: PixabayAPI.PAGE_SIZE,
         },
     };
     try{
